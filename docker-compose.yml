@@ -15,17 +15,18 @@ services:
       - VPN_TYPE=wireguard
       - TZ=Europe/Warsaw
       - FIREWALL=on
-      - FIREWALL_INPUT_PORTS=443
+      - FIREWALL_INPUT_PORTS=443,80
       - DOT=on
       - DOT_PROVIDERS=cloudflare
       - HEALTH_VPN_DURATION_INITIAL=30s
       - PUBLICIP_ENABLED=off
-      # (optional) how often to refresh; can be 0 to disable periodic writes
-      # - PUBLICIP_PERIOD=12h
     volumes:
       - ./gluetun:/gluetun
       - ./gluetun/wg0.conf:/gluetun/wireguard/wg0.conf:ro  # I keep this hardlinked with various wg conf files
     restart: unless-stopped
+    ports:
+      - "443:443"
+      - "80:80"
     networks:
       - portal-proxy
     healthcheck:
@@ -54,36 +55,11 @@ services:
       - NET_BIND_SERVICE
       - SETGID
       - SETUID
+      - CHOWN
     read_only: true
     tmpfs:
       - /var/cache/nginx
       - /var/run
-
-  portal-traefik:
-    image: traefik:v3.6.2
-    container_name: portal-traefik
-    depends_on:
-      portal-gluetun:
-        condition: service_healthy
-    command:
-      - "--configFile=/etc/traefik/traefik.yml"
-    ports:
-      - "443:443"
-    volumes:
-      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
-      - ./traefik/dynamic:/etc/traefik/dynamic:ro
-    restart: unless-stopped
-    networks:
-      - portal-proxy
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    cap_add:
-      - NET_BIND_SERVICE
-    read_only: true
-    tmpfs:
-      - /tmp
 
 networks:
   portal-proxy:

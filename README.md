@@ -8,6 +8,8 @@ TCP SNI portal that sends selected HTTPS domains **through a WireGuard VPN** usi
 
 You point a domain's DNS to this box → it dials the real upstream **via the VPN**.
 
+Inspired by Tymscar's [Imgur Geo-Blocked the UK, So I Geo-Unblocked My Entire Network](https://blog.tymscar.com/posts/imgurukproxy/) article.
+
 ---
 
 ## How it works (TL;DR)

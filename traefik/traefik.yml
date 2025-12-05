@@ -1,0 +1,14 @@
+entryPoints:
+  https:
+    address: ":443"
+
+providers:
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+log:
+  level: INFO
+
+api:
+  dashboard: false

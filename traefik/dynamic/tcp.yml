@@ -1,0 +1,15 @@
+tcp:
+  routers:
+    portal-router:
+      rule: "HostSNI(`*`)"
+      entryPoints:
+        - https
+      service: portal-service
+      tls:
+        passthrough: true
+
+  services:
+    portal-service:
+      loadBalancer:
+        servers:
+          - address: "gluetun:443"

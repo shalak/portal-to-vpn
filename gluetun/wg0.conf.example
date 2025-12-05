@@ -1,0 +1,9 @@
+[Interface]
+PrivateKey = <FROM_PROVIDER>
+Address = <FROM_PROVIDER>
+DNS = <FROM_PROVIDER>
+
+[Peer]
+PublicKey = <FROM_PROVIDER>
+AllowedIPs = <FROM_PROVIDER>
+Endpoint = <FROM_PROVIDER>

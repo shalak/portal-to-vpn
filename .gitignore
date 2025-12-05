@@ -1,1 +1,3 @@
+gluetun/servers.json
 gluetun/*.conf
+gluetun/wireguard/*

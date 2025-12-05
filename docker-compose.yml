@@ -1,11 +1,15 @@
 services:
-  gluetun:
-    image: qmcgaw/gluetun:latest
-    container_name: gluetun
+  portal-gluetun:
+    image: qmcgaw/gluetun:v3.40.3
+    container_name: portal-gluetun
+    cap_drop:
+      - ALL
     cap_add:
       - NET_ADMIN
     devices:
       - /dev/net/tun:/dev/net/tun
+    security_opt:
+      - no-new-privileges:true
     environment:
       - VPN_SERVICE_PROVIDER=custom
       - VPN_TYPE=wireguard
@@ -18,12 +22,15 @@ services:
       - DOT=on
       - DOT_PROVIDERS=cloudflare
       - HEALTH_VPN_DURATION_INITIAL=30s
+      - PUBLICIP_FILE=/gluetun/ip
+      # (optional) how often to refresh; can be 0 to disable periodic writes
+      # - PUBLICIP_PERIOD=12h
     volumes:
       - ./gluetun:/gluetun
-      - ./gluetun/wg0.conf:/gluetun/wireguard/wg0.conf:ro  # hardlinked
+      - ./gluetun/wg0.conf:/gluetun/wireguard/wg0.conf:ro  # hardlinked!
     restart: unless-stopped
     networks:
-      - proxy
+      - portal-proxy
     healthcheck:
       test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
       interval: 30s
@@ -31,35 +38,56 @@ services:
       retries: 3
       start_period: 30s
 
-  nginx:
-    image: nginx:alpine
+  portal-nginx:
+    image: nginx:1.29-alpine
     container_name: portal-nginx
     depends_on:
-      gluetun:
+      portal-gluetun:
         condition: service_healthy
     # Share gluetun's network namespace: all traffic goes through VPN
-    network_mode: "service:gluetun"
+    network_mode: "service:portal-gluetun"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - SETGID
+      - SETUID
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
 
-  traefik:
-    image: traefik:v3.1
+  portal-traefik:
+    image: traefik:v3.6.2
     container_name: portal-traefik
     depends_on:
-      gluetun:
+      portal-gluetun:
         condition: service_healthy
     command:
       - "--configFile=/etc/traefik/traefik.yml"
     ports:
-      - "443:443"            # Expose TCP 443 on the LXC (10.2.0.150)
+      - "443:443"
     volumes:
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./traefik/dynamic:/etc/traefik/dynamic:ro
     restart: unless-stopped
     networks:
-      - proxy
+      - portal-proxy
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    read_only: true
+    tmpfs:
+      - /tmp
 
 networks:
-  proxy:
+  portal-proxy:
     driver: bridge

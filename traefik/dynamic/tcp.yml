@@ -12,4 +12,4 @@ tcp:
     portal-service:
       loadBalancer:
         servers:
-          - address: "gluetun:443"
+          - address: "portal-gluetun:443"

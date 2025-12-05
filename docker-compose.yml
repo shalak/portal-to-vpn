@@ -19,7 +19,7 @@ services:
       - DOT=on
       - DOT_PROVIDERS=cloudflare
       - HEALTH_VPN_DURATION_INITIAL=30s
-      - PUBLICIP_FILE=/gluetun/ip
+      - PUBLICIP_ENABLED=off
       # (optional) how often to refresh; can be 0 to disable periodic writes
       # - PUBLICIP_PERIOD=12h
     volumes:

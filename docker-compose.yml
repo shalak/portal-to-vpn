@@ -18,7 +18,7 @@ services:
       # Firewall & DNS similar to blog post
       - FIREWALL=on
       - FIREWALL_INPUT_PORTS=443
-      - FIREWALL_OUTBOUND_SUBNETS=10.0.0.0/8
+      - FIREWALL_OUTBOUND_SUBNETS=${FIREWALL_OUTBOUND_SUBNETS:-10.0.0.0/8}  # you might want to change this
       - DOT=on
       - DOT_PROVIDERS=cloudflare
       - HEALTH_VPN_DURATION_INITIAL=30s
@@ -27,7 +27,7 @@ services:
       # - PUBLICIP_PERIOD=12h
     volumes:
       - ./gluetun:/gluetun
-      - ./gluetun/wg0.conf:/gluetun/wireguard/wg0.conf:ro  # hardlinked!
+      - ./gluetun/wg0.conf:/gluetun/wireguard/wg0.conf:ro  # I suggest keep this hardlinked with various wg conf files
     restart: unless-stopped
     networks:
       - portal-proxy

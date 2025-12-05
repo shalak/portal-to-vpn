@@ -1,3 +1,4 @@
+gluetun/ip
 gluetun/servers.json
 gluetun/*.conf
 gluetun/wireguard/*
